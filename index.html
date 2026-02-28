@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEG4 | Ultimate Content Forensics</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;500;800&family=Space+Grotesk:wght@300;700&display=swap');
+        
+        :root { --neon-gold: #facc15; --deep-bg: #030303; }
+        
+        body { 
+            background: var(--deep-bg); 
+            color: #fff; 
+            font-family: 'Space Grotesk', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* Animated Grid Background */
+        .bg-grid {
+            background-image: linear-gradient(rgba(250, 204, 21, 0.05) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(250, 204, 21, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+
+        .glow-card {
+            background: rgba(15, 15, 15, 0.7);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .scanning-active {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .scanning-active::after {
+            content: "";
+            position: absolute;
+            top: -100%;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent, rgba(250, 204, 21, 0.2), transparent);
+            animation: scan-move 2s linear infinite;
+        }
+
+        @keyframes scan-move {
+            0% { top: -100%; }
+            100% { top: 100%; }
+        }
+
+        .floating { animation: float 6s ease-in-out infinite; }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+    </style>
+</head>
+<body class="bg-grid">
+
+    <nav class="fixed top-0 w-full z-50 px-10 py-4 flex justify-between items-center border-b border-white/5 bg-black/80 backdrop-blur-md">
+        <div class="flex items-center gap-4">
+            <div class="p-2 bg-yellow-500 rounded flex items-center justify-center">
+                <svg class="w-5 h-5 text-black" fill="currentColor" viewBox="0 0 20 20"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path></svg>
+            </div>
+            <h2 class="text-xl font-bold tracking-tighter uppercase italic">SEG4 <span class="text-yellow-500">Forensics</span></h2>
+        </div>
+        <div class="hidden md:flex gap-10 text-[11px] font-bold tracking-[0.2em] text-gray-500">
+            <a href="#analyze" class="hover:text-yellow-500">TERMINAL</a>
+            <a href="#stats" class="hover:text-yellow-500">METRICS</a>
+            <a href="#threats" class="hover:text-yellow-500">THREAT_MAP</a>
+        </div>
+        <div class="mono text-[10px] text-yellow-500 border border-yellow-500/30 px-3 py-1 rounded">SYS_AUTH: STABLE</div>
+    </nav>
+
+    <section class="min-h-screen flex flex-col items-center justify-center pt-32 px-6 text-center">
+        <div class="floating mb-10">
+            <div class="w-24 h-24 border-2 border-yellow-500/20 rounded-full flex items-center justify-center p-2">
+                <div class="w-full h-full border border-yellow-500 rounded-full animate-spin-slow flex items-center justify-center">
+                    <span class="text-yellow-500 text-xs font-bold animate-pulse">SEG4</span>
+                </div>
+            </div>
+        </div>
+        <h1 class="text-7xl md:text-9xl font-bold tracking-tighter mb-8 italic">
+            DECODE <span class="text-yellow-500">TRUTH.</span>
+        </h1>
+        <p class="max-w-2xl text-gray-500 text-lg md:text-xl font-light leading-relaxed mb-12">
+            The ultimate cryptographic and neural engine for content verification. SEG4 identifies manipulated media and AI-synthesized datasets in milliseconds.
+        </p>
+        <a href="#analyze" class="bg-yellow-500 text-black px-12 py-5 rounded-full font-black text-xs tracking-widest hover:scale-110 transition-transform">
+            OPEN COMMAND INTERFACE
+        </a>
+    </section>
+
+    <section id="analyze" class="max-w-7xl mx-auto px-6 py-32">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <div class="lg:col-span-2 glow-card rounded-[40px] p-2 overflow-hidden border border-white/5">
+                <div class="flex bg-white/5 p-4 gap-4">
+                    <button id="t1" onclick="switchTab('text')" class="px-6 py-2 text-[10px] font-bold tracking-widest border border-yellow-500 text-yellow-500 rounded-full">TEXT_INPUT</button>
+                    <button id="t2" onclick="switchTab('img')" class="px-6 py-2 text-[10px] font-bold tracking-widest text-gray-500 border border-transparent hover:border-white/10 rounded-full">IMAGE_INPUT</button>
+                </div>
+                
+                <div id="scan-container" class="p-8 relative">
+                    <div id="text-area">
+                        <textarea id="main-input" class="w-full h-80 bg-transparent border-none text-2xl mono text-yellow-100 placeholder:text-gray-800 focus:outline-none resize-none" placeholder="PASTE_ENCRYPTED_OR_SOURCE_TEXT_HERE_..."></textarea>
+                    </div>
+                    <div id="image-area" class="hidden h-80 flex flex-col items-center justify-center border border-dashed border-white/10 rounded-3xl group cursor-pointer hover:bg-yellow-500/5">
+                        <span class="text-5xl text-gray-800 group-hover:text-yellow-500 transition-colors">⬡</span>
+                        <p class="mt-4 mono text-[10px] text-gray-600">DRAG_MEDIA_TO_NODE</p>
+                    </div>
+                    
+                    <button onclick="runScan()" id="scan-btn" class="w-full mt-8 bg-white text-black py-6 rounded-2xl font-black text-sm tracking-[0.5em] hover:bg-yellow-500 transition-all flex items-center justify-center gap-4">
+                        RUN_NEURAL_DIAGNOSTICS
+                    </button>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <div class="glow-card rounded-[40px] p-8">
+                    <h3 class="mono text-[10px] font-bold text-yellow-600 tracking-widest mb-6 underline decoration-double">ENGINE_LOGS</h3>
+                    <div id="logs" class="mono text-[10px] text-gray-500 space-y-2 h-40 overflow-hidden">
+                        <p class="text-green-500">> SYSTEM_BOOT: COMPLETED</p>
+                        <p>> NEURAL_NET_V4: ACTIVE</p>
+                        <p>> AWAITING_BUFFER...</p>
+                    </div>
+                </div>
+                
+                <div id="stats" class="glow-card rounded-[40px] p-8 border-l-4 border-yellow-500">
+                    <h3 class="mono text-[10px] font-bold text-gray-300 tracking-widest mb-8">CONFIDENCE_SCORING</h3>
+                    <div class="space-y-8">
+                        <div>
+                            <div class="flex justify-between text-[10px] mb-3 font-bold text-gray-500"><span>AI_FINGERPRINT</span><span id="v1" class="text-white">0.0%</span></div>
+                            <div class="h-1 bg-white/5 rounded-full"><div id="b1" class="h-full bg-yellow-500 w-0 transition-all duration-1000 shadow-[0_0_10px_#facc15]"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-[10px] mb-3 font-bold text-gray-500"><span>LINGUISTIC_DRIFT</span><span id="v2" class="text-white">0.0%</span></div>
+                            <div class="h-1 bg-white/5 rounded-full"><div id="b2" class="h-full bg-yellow-500 w-0 transition-all duration-1000"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-[10px] mb-3 font-bold text-gray-500"><span>SYNTAX_ANOMALY</span><span id="v3" class="text-white">0.0%</span></div>
+                            <div class="h-1 bg-white/5 rounded-full"><div id="b3" class="h-full bg-yellow-500 w-0 transition-all duration-1000"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="threats" class="max-w-7xl mx-auto px-6 py-32 border-t border-white/5">
+        <div class="flex justify-between items-end mb-16">
+            <div>
+                <h2 class="text-5xl font-bold tracking-tighter mb-4 italic">GLOBAL <span class="text-yellow-500">TRAFFIC.</span></h2>
+                <p class="text-gray-500 mono text-xs uppercase tracking-widest">Real-time analysis stream from SEG4 Nodes</p>
+            </div>
+            <div class="text-right hidden md:block">
+                <p class="text-3xl font-bold text-yellow-500">1.2M+</p>
+                <p class="text-[9px] text-gray-600 tracking-widest uppercase">Verified Objects Today</p>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div class="glow-card p-6 rounded-3xl border-t border-yellow-500/20">
+                <p class="mono text-[9px] text-gray-600 mb-2">NODE_01: SAN_FRAN</p>
+                <p class="text-xl font-bold">98.2% <span class="text-[10px] text-green-500">SECURE</span></p>
+            </div>
+            <div class="glow-card p-6 rounded-3xl border-t border-yellow-500/20">
+                <p class="mono text-[9px] text-gray-600 mb-2">NODE_02: TOKYO</p>
+                <p class="text-xl font-bold">92.1% <span class="text-[10px] text-green-500">SECURE</span></p>
+            </div>
+            <div class="glow-card p-6 rounded-3xl border-t border-red-500/20">
+                <p class="mono text-[9px] text-gray-600 mb-2">NODE_03: BERLIN</p>
+                <p class="text-xl font-bold">64.5% <span class="text-[10px] text-red-500">HIGH_RISK</span></p>
+            </div>
+            <div class="glow-card p-6 rounded-3xl border-t border-yellow-500/20">
+                <p class="mono text-[9px] text-gray-600 mb-2">NODE_04: DELHI</p>
+                <p class="text-xl font-bold">89.9% <span class="text-[10px] text-green-500">SECURE</span></p>
+            </div>
+        </div>
+    </section>
+
+    <footer class="py-20 bg-black/50 backdrop-blur-3xl border-t border-white/5 text-center">
+        <div class="flex justify-center gap-10 mb-10 opacity-30">
+            <span class="mono text-[10px]">ENCRYPTION_V2</span>
+            <span class="mono text-[10px]">SEG4_PROTOCOLS</span>
+            <span class="mono text-[10px]">SECURE_SERVER_A2</span>
+        </div>
+        <p class="text-[11px] text-gray-500 font-bold uppercase tracking-[0.5em]">
+            &copy; 2026 Powered by <span class="text-yellow-500">SEG4 Engineering Group</span>
+        </p>
+    </footer>
+
+    <script>
+function switchTab(type) {
+    const isText = type === 'text';
+    document.getElementById('text-area').classList.toggle('hidden', !isText);
+    document.getElementById('image-area').classList.toggle('hidden', isText);
+}
+
+function addLog(msg) {
+    const logs = document.getElementById('logs');
+    const p = document.createElement('p');
+    p.innerText = `> ${msg}`;
+    logs.prepend(p);
+}
+
+function runScan() {
+
+    const btn = document.getElementById('scan-btn');
+    const container = document.getElementById('scan-container');
+    const inputText = document.getElementById("main-input").value;
+
+    if (!inputText || inputText.length < 20) {
+        alert("Please enter at least 20 characters.");
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerText = "EXTRACTING_DATA...";
+    container.classList.add('scanning-active');
+
+    addLog("Reading buffer...");
+    addLog("Executing neural comparison...");
+
+    const apiUrl = window.location.hostname === "localhost"
+        ? "http://localhost:5000/scan"
+        : "/api/scan";
+
+    fetch(apiUrl, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ text: inputText })
+    })
+    .then(res => res.json())
+    .then(data => {
+
+        document.getElementById('b1').style.width = data.aiFingerprint + '%';
+        document.getElementById('v1').innerText = data.aiFingerprint + '%';
+
+        document.getElementById('b2').style.width = data.linguisticDrift + '%';
+        document.getElementById('v2').innerText = data.linguisticDrift + '%';
+
+        document.getElementById('b3').style.width = data.syntaxAnomaly + '%';
+        document.getElementById('v3').innerText = data.syntaxAnomaly + '%';
+
+        addLog("Deep scan complete.");
+        addLog(data.verdict);
+
+        btn.innerText = "SCAN_COMPLETE_100%";
+        btn.classList.replace('bg-white', 'bg-yellow-500');
+        container.classList.remove('scanning-active');
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Backend connection failed.");
+    });
+}
+</script>
+        
+    
+</body>
+</html>
